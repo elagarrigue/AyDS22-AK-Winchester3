@@ -58,7 +58,7 @@ internal class SongDescriptionHelperImpl : SongDescriptionHelper {
                 "12" -> fecha = "December"
             }
         }
-        return fecha + ", " + { song.releaseDate.split("-").first() }
+        return "$fecha, " + song.releaseDate.split("-").first()
     }
 
     private fun getDescriptionByDay(song: Song): String {
