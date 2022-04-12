@@ -37,7 +37,7 @@ internal class SongDescriptionHelperImpl : SongDescriptionHelper {
         var fecha = song.releaseDate.split("-").first()
         return if (noEsBisiesto(fecha.toInt())) {
             "$fecha (not a leap year)"
-        } else fecha
+        } else "$fecha (leap year)"
     }
 
     private fun getDescriptionByMonth(song: Song): String {
