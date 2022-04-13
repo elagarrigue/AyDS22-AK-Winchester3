@@ -1,10 +1,15 @@
 package ayds.winchester.songinfo.home.view
 
+import ayds.winchester.songinfo.home.model.entities.EmptySong
 import ayds.winchester.songinfo.home.model.entities.Song
 
-class ResultReleaseDate {
+interface ResultReleaseDate{
+    fun getDescription(song: Song = EmptySong): String
+}
 
-    public fun getDescription(song: Song): String {
+internal class ResultReleaseDateImpl(): ResultReleaseDate{
+
+    override fun getDescription(song: Song): String {
         return when (song.releaseDatePrecision) {
             "year" -> getDescriptionByYear(song)
             "month" -> getDescriptionByMonth(song)
@@ -12,6 +17,7 @@ class ResultReleaseDate {
             else -> "Invalid Precision"
         }
     }
+
     private fun getDescriptionByYear(song: Song): String {
         var fecha = song.releaseDate.split("-").first()
         return if (!isLeapYear(fecha.toInt())) {

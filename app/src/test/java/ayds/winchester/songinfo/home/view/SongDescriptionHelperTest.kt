@@ -8,7 +8,7 @@ import org.junit.Test
 
 class SongDescriptionHelperTest {
 
-    private val songDescriptionHelper by lazy { SongDescriptionHelperImpl() }
+    private val songDescriptionHelper by lazy { SongDescriptionHelperImpl(HomeViewInjector.resultReleaseDate) }
 
     @Test
     fun `given a local song it should return the description`() {
