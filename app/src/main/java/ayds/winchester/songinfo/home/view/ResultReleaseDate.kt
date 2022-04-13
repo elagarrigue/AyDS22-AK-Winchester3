@@ -28,7 +28,7 @@ internal class ResultReleaseDateImpl(): ResultReleaseDate{
     private fun getDescriptionByMonth(song: Song): String {
         var fecha = ""
         if (song.releaseDate.split("-").component2() != "") {
-            fromNumberToMonth(song.releaseDate.split("-").component2() )
+            fecha = fromNumberToMonth(song.releaseDate.split("-").component2())
         }
         return "$fecha, " + song.releaseDate.split("-").first()
     }
