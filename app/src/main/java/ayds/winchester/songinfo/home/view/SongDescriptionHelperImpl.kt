@@ -9,7 +9,7 @@ interface SongDescriptionHelper {
     fun getSongDescriptionText(song: Song = EmptySong): String
 }
 
-internal class SongDescriptionHelperImpl(resultReleaseDate: Any) : SongDescriptionHelper {
+internal class SongDescriptionHelperImpl(resultReleaseDate: ResultReleaseDate) : SongDescriptionHelper {
     override fun getSongDescriptionText(song: Song): String {
         return when (song) {
             is SpotifySong ->
@@ -25,8 +25,3 @@ internal class SongDescriptionHelperImpl(resultReleaseDate: Any) : SongDescripti
         }
     }
 }
-
-
-
-
-

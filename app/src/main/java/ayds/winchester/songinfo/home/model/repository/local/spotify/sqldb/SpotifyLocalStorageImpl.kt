@@ -33,8 +33,6 @@ internal class SpotifyLocalStorageImpl(
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $SONGS_TABLE")
-        onCreate(db)
     }
 
     override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -57,7 +55,7 @@ internal class SpotifyLocalStorageImpl(
             put(ARTIST_COLUMN, song.artistName)
             put(ALBUM_COLUMN, song.albumName)
             put(RELEASE_DATE_COLUMN, song.releaseDate)
-            put(RELEASE_DATE_PRECISION_COLUMN, song.releaseDatePrecision)
+            put(RELEASE_DATE_PRECISION_COLUMN, song.releaseDatePrecision.ordinal)
             put(SPOTIFY_URL_COLUMN, song.spotifyUrl)
             put(IMAGE_URL_COLUMN, song.imageUrl)
         }

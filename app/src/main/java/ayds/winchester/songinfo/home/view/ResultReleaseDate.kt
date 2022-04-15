@@ -3,11 +3,11 @@ package ayds.winchester.songinfo.home.view
 import ayds.winchester.songinfo.home.model.entities.EmptySong
 import ayds.winchester.songinfo.home.model.entities.Song
 
-interface ResultReleaseDate{
+interface ResultReleaseDate {
     fun getDescription(song: Song = EmptySong): String
 }
 
-internal class ResultReleaseDateImpl(): ResultReleaseDate{
+internal class ResultReleaseDateImpl() : ResultReleaseDate {
 
     override fun getDescription(song: Song): String {
         return when (song.releaseDatePrecision) {
@@ -26,41 +26,33 @@ internal class ResultReleaseDateImpl(): ResultReleaseDate{
     }
 
     private fun getDescriptionByMonth(song: Song): String {
-        var fecha = ""
-        if (song.releaseDate.split("-").component2() != "") {
-            fecha = fromNumberToMonth(song.releaseDate.split("-").component2())
-        }
+        var fecha = fromNumberToMonth(song.releaseDate.split("-").component2())
         return "$fecha, " + song.releaseDate.split("-").first()
     }
 
-    private fun fromNumberToMonth(month:String):String{
+    private fun fromNumberToMonth(month: String): String {
         var fecha = ""
         when (month) {
-            "01" ->  fecha = "January"
-            "02" ->  fecha ="February"
-            "03" ->  fecha ="March"
-            "04" ->  fecha ="April"
-            "05" ->  fecha ="May"
-            "06" ->  fecha ="June"
-            "07" ->  fecha ="July"
-            "08" ->  fecha ="August"
-            "09" ->  fecha ="September"
-            "10" ->  fecha ="October"
-            "11" ->  fecha ="November"
-            "12" ->  fecha ="December"
+            "01" -> fecha = "January"
+            "02" -> fecha = "February"
+            "03" -> fecha = "March"
+            "04" -> fecha = "April"
+            "05" -> fecha = "May"
+            "06" -> fecha = "June"
+            "07" -> fecha = "July"
+            "08" -> fecha = "August"
+            "09" -> fecha = "September"
+            "10" -> fecha = "October"
+            "11" -> fecha = "November"
+            "12" -> fecha = "December"
         }
         return fecha
     }
 
     private fun getDescriptionByDay(song: Song): String {
-
-        return if (song.releaseDate.split("-").component3() != "") {
-            (song.releaseDate.split("-").component3()) +
-                    "/" + (song.releaseDate.split("-").component2()) +
-                    "/" + (song.releaseDate.split("-").first())
-        } else {
-            ""
-        }
+        return (song.releaseDate.split("-").component3()) +
+                "/" + (song.releaseDate.split("-").component2()) +
+                "/" + (song.releaseDate.split("-").first())
     }
 
     private fun isLeapYear(n: Int) = (n % 4 == 0) && (n % 100 != 0 || n % 400 == 0)
