@@ -5,7 +5,7 @@ import ayds.winchester.songinfo.home.model.HomeModelInjector
 
 object HomeViewInjector {
     val resultReleaseDate : ResultReleaseDate = ResultReleaseDateImpl()
-    val songDescriptionHelper: SongDescriptionHelper = SongDescriptionHelperImpl(resultReleaseDate)
+    private val songDescriptionHelper: SongDescriptionHelper = SongDescriptionHelperImpl(resultReleaseDate)
 
     fun init(homeView: HomeView) {
         HomeModelInjector.initHomeModel(homeView)

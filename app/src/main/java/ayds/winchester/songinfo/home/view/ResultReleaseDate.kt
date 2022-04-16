@@ -20,10 +20,10 @@ internal class ResultReleaseDateImpl() : ResultReleaseDate {
     }
 
     private fun getDescriptionByYear(song: Song): String {
-        var fecha = (song.releaseDate.split("-").first())
-        return if (!isLeapYear(fecha.toInt())) {
-            "$fecha (not a leap year)"
-        } else "$fecha (leap year)"
+        var year = (song.releaseDate.split("-").first())
+        return if (!isLeapYear(year.toInt())) {
+            "$year (not a leap year)"
+        } else "$year (leap year)"
     }
 
     private fun getDescriptionByMonth(song: Song): String {
@@ -32,22 +32,21 @@ internal class ResultReleaseDateImpl() : ResultReleaseDate {
     }
 
     private fun fromNumberToMonth(month: String): String {
-        var fecha = ""
-        when (month) {
-            "01" -> fecha = "January"
-            "02" -> fecha = "February"
-            "03" -> fecha = "March"
-            "04" -> fecha = "April"
-            "05" -> fecha = "May"
-            "06" -> fecha = "June"
-            "07" -> fecha = "July"
-            "08" -> fecha = "August"
-            "09" -> fecha = "September"
-            "10" -> fecha = "October"
-            "11" -> fecha = "November"
-            "12" -> fecha = "December"
+        return when (month) {
+            "01" ->  "January"
+            "02" ->  "February"
+            "03" ->  "March"
+            "04" ->  "April"
+            "05" ->  "May"
+            "06" ->  "June"
+            "07" ->  "July"
+            "08" ->  "August"
+            "09" ->  "September"
+            "10" ->  "October"
+            "11" ->  "November"
+            "12" ->  "December"
+            else -> "Invalid month"
         }
-        return fecha
     }
 
     private fun getDescriptionByDay(song: Song): String {
