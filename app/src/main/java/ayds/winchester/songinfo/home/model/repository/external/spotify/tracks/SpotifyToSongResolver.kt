@@ -1,5 +1,6 @@
 package ayds.winchester.songinfo.home.model.repository.external.spotify.tracks
 
+import ayds.winchester.songinfo.home.model.entities.DatePrecision
 import com.google.gson.Gson
 import ayds.winchester.songinfo.home.model.entities.SpotifySong
 import com.google.gson.JsonObject
@@ -21,7 +22,8 @@ private const val URL = "url"
 private const val EXTERNAL_URL = "external_urls"
 private const val SPOTIFY = "spotify"
 
-internal class JsonToSongResolver : SpotifyToSongResolver {
+internal class JsonToSongResolver(private val precisionMapper: DatePrecisionMapper) : SpotifyToSongResolver {
+
 
     override fun getSongFromExternalData(serviceData: String?): SpotifySong? =
         try {
@@ -61,9 +63,10 @@ internal class JsonToSongResolver : SpotifyToSongResolver {
         return album[RELEASE_DATE].asString
     }
 
-    private fun JsonObject.getReleaseDatePrecision(): String {
+    private fun JsonObject.getReleaseDatePrecision(): DatePrecision {
         val album = this[ALBUM].asJsonObject
-        return album[RELEASE_DATE_PRECISION].asString
+        val precisionStringFromJson = album[RELEASE_DATE_PRECISION].asString
+        return precisionMapper.getDatePrecisionFromString(precisionStringFromJson)
     }
 
     private fun JsonObject.getImageUrl(): String {
