@@ -27,8 +27,10 @@ internal class ResultReleaseDateImpl() : ResultReleaseDate {
     }
 
     private fun getDescriptionByMonth(song: Song): String {
-        var fecha = fromNumberToMonth(song.releaseDate.split("-").component2())
-        return "$fecha, " + song.releaseDate.split("-").first()
+        var year = song.releaseDate.split("-").first()
+        var month = song.releaseDate.split("-").component2()
+        var fecha = fromNumberToMonth(month)
+        return "$fecha, $year"
     }
 
     private fun fromNumberToMonth(month: String): String {
@@ -50,9 +52,10 @@ internal class ResultReleaseDateImpl() : ResultReleaseDate {
     }
 
     private fun getDescriptionByDay(song: Song): String {
-        return (song.releaseDate.split("-").component3()) +
-                "/" + (song.releaseDate.split("-").component2()) +
-                "/" + (song.releaseDate.split("-").first())
+        var day = song.releaseDate.split("-").component3()
+        var month = song.releaseDate.split("-").component2()
+        var year = song.releaseDate.split("-").first()
+        return ("$day/$month/$year")
     }
 
     private fun isLeapYear(n: Int) = (n % 4 == 0) && (n % 100 != 0 || n % 400 == 0)
