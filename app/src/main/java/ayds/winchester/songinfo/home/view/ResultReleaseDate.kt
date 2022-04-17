@@ -12,23 +12,24 @@ internal class ResultReleaseDateImpl() : ResultReleaseDate {
 
     override fun getDescription(song: Song): String {
         return when (song.releaseDatePrecision) {
-            DatePrecision.YEAR -> getDescriptionByYear(song)
-            DatePrecision.MONTH -> getDescriptionByMonth(song)
-            DatePrecision.DAY -> getDescriptionByDay(song)
+            DatePrecision.YEAR -> getDescriptionByYear(song.releaseDate)
+            DatePrecision.MONTH -> getDescriptionByMonth(song.releaseDate)
+            DatePrecision.DAY -> getDescriptionByDay(song.releaseDate)
             else -> "Invalid Precision"
         }
     }
 
-    private fun getDescriptionByYear(song: Song): String {
-        var year = (song.releaseDate.split("-").first())
+    private fun getDescriptionByYear(releaseDate : String): String {
+        var year = (releaseDate.split("-").first())
         return if (!isLeapYear(year.toInt())) {
             "$year (not a leap year)"
         } else "$year (leap year)"
     }
 
-    private fun getDescriptionByMonth(song: Song): String {
-        var year = song.releaseDate.split("-").first()
-        var month = song.releaseDate.split("-").component2()
+    private fun getDescriptionByMonth(releaseDate: String): String {
+        val parts = releaseDate.split("-")
+        var year = parts.first()
+        var month = parts.component2()
         var fecha = fromNumberToMonth(month)
         return "$fecha, $year"
     }
@@ -51,10 +52,11 @@ internal class ResultReleaseDateImpl() : ResultReleaseDate {
         }
     }
 
-    private fun getDescriptionByDay(song: Song): String {
-        var day = song.releaseDate.split("-").component3()
-        var month = song.releaseDate.split("-").component2()
-        var year = song.releaseDate.split("-").first()
+    private fun getDescriptionByDay(releaseDate: String): String {
+        val parts = releaseDate.split("-")
+        var day = parts.component3()
+        var month = parts.component2()
+        var year = parts.first()
         return ("$day/$month/$year")
     }
 
