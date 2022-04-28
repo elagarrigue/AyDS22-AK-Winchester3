@@ -11,7 +11,6 @@ import com.google.gson.JsonObject
 import android.content.Intent
 import android.net.Uri
 import android.text.Html
-import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import ayds.winchester.songinfo.utils.UtilsInjector
@@ -24,19 +23,28 @@ private const val WIKIPEDIA_ARTICLE_IMAGE_URL = "https://upload.wikimedia.org/wi
 
 private const val QUERY = "query"
 private const val SEARCH = "search"
-private const val PAGEID = "pageid"
+private const val PAGE_ID = "pageid"
 private const val SNIPPET = "snippet"
+private const val PREFIX_LOCALLY_STORED = "[*]"
+private const val NO_RESULTS = "No results"
 
 interface ArtistInfo {
-    val info: String
+    var info: String
     val pageId: String
+    var isLocallyStored: Boolean
 }
 
 data class WikipediaArtistInfo(
-    override val info: String,
-    override val pageId: String
+    override var info: String,
+    override val pageId: String,
+    override var isLocallyStored: Boolean = false
 ) : ArtistInfo
 
+object EmptyArtistInfo : ArtistInfo {
+    override var info: String = NO_RESULTS
+    override val pageId: String = ""
+    override var isLocallyStored: Boolean = false
+}
 
 internal class OtherInfoWindow : AppCompatActivity() {
 
@@ -45,9 +53,10 @@ internal class OtherInfoWindow : AppCompatActivity() {
     private lateinit var articleImageView: ImageView
 
     private lateinit var pageId: String
+    private var artistName: String = ""
     private val imageLoader: ImageLoader = UtilsInjector.imageLoader
 
-    private val wikipediaLocalStorage = DataBaseImpl(this)
+    private val wikipediaLocalStorage = WikipediaLocalStorageImpl(this)
     private val wikipediaAPIRetrofit = Retrofit.Builder()
         .baseUrl(WIKIPEDIA_URL)
         .addConverterFactory(ScalarsConverterFactory.create())
@@ -57,10 +66,15 @@ internal class OtherInfoWindow : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_other_info)
-        open(intent.getStringExtra("artistName"))
         initProperties()
         initListeners()
         updateArticleImage()
+        updateArtistName()
+        searchArtist(artistName)
+    }
+
+    private fun updateArtistName() {
+        artistName = intent.getStringExtra(ARTIST_NAME_EXTRA).toString()
     }
 
     private fun initProperties() {
@@ -70,48 +84,58 @@ internal class OtherInfoWindow : AppCompatActivity() {
     }
 
     private fun initListeners(){
-        findViewById<View>(R.id.openUrlButton).setOnClickListener {
+        openUrlButton.setOnClickListener {
             openUrlAction()
         }
     }
 
-    private fun getArtistInfoByName(artistName: String?) {
-        Thread {
-            var artistInfoBio = ""
-            var artistInfo = wikipediaLocalStorage.getArtistInfoByName(artistName)
-
-            if (artistInfo != null) {
-                artistInfoBio = markArtistInfoBioAsLocal(artistInfo.info)
-                pageId = artistInfo.pageId
-            }
-
-            else {
-                artistInfo = getArtistInfoFromExternalData(artistName)
-                    if (artistInfo != null) {
-                        if (artistInfo.info == null) {
-                            artistInfoBio = "No Results"
-                        } else {
-                            artistInfoBio = artistInfo.info
-                            pageId = artistInfo.pageId
-                            artistInfoBio = textToHtml(artistInfoBio, artistName)
-                            wikipediaLocalStorage.insertArtist(artistName, artistInfoBio, pageId)
-                        }
-                    }
-            }
-            runOnUiThread {
-                artistInfoTextView!!.text = Html.fromHtml(artistInfoBio)
-            }
-        }.start()
+    private fun searchArtistAction(artistName: String){
+        val artistInfo = getArtistInfoByName(artistName)
+        var artistInfoBio = artistInfo.info
+        if (artistInfo.isLocallyStored) {
+            artistInfoBio = markArtistInfoBioAsLocal(artistInfoBio)
+        }
+        updateArtistInfoTextView(artistInfoBio)
+        pageId = artistInfo.pageId
     }
 
-    private fun markArtistInfoBioAsLocal(artistInfoBio : String) = "[*]${artistInfoBio}"
+    private fun updateArtistInfoTextView(artistInfoBio: String){
+        runOnUiThread {
+            artistInfoTextView!!.text = Html.fromHtml(artistInfoBio)
+        }
+    }
+
+    private fun getArtistInfoByName(artistName: String) : ArtistInfo{
+        var artistInfo = wikipediaLocalStorage.getArtistInfoByName(artistName)
+
+        when {
+            artistInfo != null -> markArtistInfoAsLocal(artistInfo)
+            else -> {
+                try {
+                    artistInfo = getArtistInfoFromExternalData(artistName)
+                    artistInfo?.let {
+                        it.info = textToHtml(it.info, artistName)
+                        wikipediaLocalStorage.insertArtist(artistName, it)
+                    }
+                } catch (e: Exception) {
+                    artistInfo = null
+                }
+            }
+        }
+
+        return artistInfo ?: EmptyArtistInfo
+    }
+
+    private fun markArtistInfoBioAsLocal(artistInfoBio : String) = "$PREFIX_LOCALLY_STORED${artistInfoBio}"
+
+    private fun markArtistInfoAsLocal(artistInfo : ArtistInfo){
+        artistInfo.isLocallyStored = true
+    }
 
     private fun getArtistInfoFromExternalData(artistName: String?): WikipediaArtistInfo? =
         try {
             getServiceData(artistName)?.getFirstItem()?.let { item ->
-                WikipediaArtistInfo(
-                    item.getInfo(), item.getPageId()
-                )
+                WikipediaArtistInfo(item.getInfo(), item.getPageId())
             }
         } catch (e: Exception) {
             null
@@ -119,7 +143,7 @@ internal class OtherInfoWindow : AppCompatActivity() {
 
     private fun JsonObject.getInfo() : String = this[SNIPPET].asString.replace("\\n", "\n")
 
-    private fun JsonObject.getPageId() : String = this[PAGEID].asString
+    private fun JsonObject.getPageId() : String = this[PAGE_ID].asString
 
     private fun getServiceData(artistName: String?): String? {
         return wikipediaAPI.getArtistInfo(artistName).execute().body()
@@ -132,8 +156,10 @@ internal class OtherInfoWindow : AppCompatActivity() {
         return items[0].asJsonObject
     }
 
-    private fun open(artist: String?) {
-        getArtistInfoByName(artist)
+    private fun searchArtist(artistName: String) {
+        Thread {
+            searchArtistAction(artistName)
+        }.start()
     }
 
     private fun updateArticleImage() {
@@ -149,20 +175,20 @@ internal class OtherInfoWindow : AppCompatActivity() {
         startActivity(intent)
     }
 
+    private fun textToHtml(text: String, term: String?): String {
+        val builder = StringBuilder()
+        builder.append("<html><div width=400>")
+        builder.append("<font face=\"arial\">")
+        val textWithBold = text
+            .replace("'", " ")
+            .replace("\n", "<br>")
+            .replace("(?i)" + term!!.toRegex(), "<b>" + term.uppercase() + "</b>")
+        builder.append(textWithBold)
+        builder.append("</font></div></html>")
+        return builder.toString()
+    }
+
     companion object {
         const val ARTIST_NAME_EXTRA = "artistName"
-
-        fun textToHtml(text: String, term: String?): String {
-            val builder = StringBuilder()
-            builder.append("<html><div width=400>")
-            builder.append("<font face=\"arial\">")
-            val textWithBold = text
-                .replace("'", " ")
-                .replace("\n", "<br>")
-                .replace("(?i)" + term!!.toRegex(), "<b>" + term.uppercase() + "</b>")
-            builder.append(textWithBold)
-            builder.append("</font></div></html>")
-            return builder.toString()
-        }
     }
 }

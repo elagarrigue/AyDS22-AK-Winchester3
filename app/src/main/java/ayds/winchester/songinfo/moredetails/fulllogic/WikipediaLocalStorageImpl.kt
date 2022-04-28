@@ -5,9 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-import ayds.winchester.songinfo.home.model.repository.local.spotify.sqldb.*
 import java.sql.SQLException
-import java.util.ArrayList
 
 private const val ARTISTS_TABLE = "artists"
 private const val ID_COLUMN = "id"
@@ -32,14 +30,15 @@ private val projection = arrayOf(
     ARTIST_PAGE_ID_COLUMN
 )
 
-interface DataBase{
+interface WikipediaLocalStorage{
 
-    fun insertArtist(artist: String?, info: String?, pageId: String?)
+    fun insertArtist(artistName: String?, artistInfo: WikipediaArtistInfo)
 
     fun getArtistInfoByName(artistName: String?): WikipediaArtistInfo?
+
 }
 
-internal class DataBaseImpl(context: Context?) : DataBase, SQLiteOpenHelper(context, "dictionary.db", null, 1) {
+internal class WikipediaLocalStorageImpl(context: Context?) : WikipediaLocalStorage, SQLiteOpenHelper(context, "dictionary.db", null, 1) {
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(createArtistTableQuery)
@@ -47,12 +46,12 @@ internal class DataBaseImpl(context: Context?) : DataBase, SQLiteOpenHelper(cont
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {}
 
-    override fun insertArtist(artist: String?, info: String?, pageId: String?) {
+    override fun insertArtist(artistName: String?, artistInfo: WikipediaArtistInfo) {
         val values = ContentValues().apply {
-            put(ARTIST_COLUMN, artist)
-            put(INFO_COLUMN, info)
+            put(ARTIST_COLUMN, artistName)
+            put(INFO_COLUMN, artistInfo.info)
             put(SOURCE_COLUMN, 1)
-            put(ARTIST_PAGE_ID_COLUMN, pageId)
+            put(ARTIST_PAGE_ID_COLUMN, artistInfo.pageId)
         }
         writableDatabase?.insert(ARTISTS_TABLE, null, values)
     }
@@ -74,7 +73,7 @@ internal class DataBaseImpl(context: Context?) : DataBase, SQLiteOpenHelper(cont
     try {
         with(cursor) {
             if (moveToNext()) {
-                    WikipediaArtistInfo(
+                WikipediaArtistInfo(
                     info = getString(getColumnIndexOrThrow(INFO_COLUMN)),
                     pageId = getString(getColumnIndexOrThrow(ARTIST_PAGE_ID_COLUMN)),
                 )
