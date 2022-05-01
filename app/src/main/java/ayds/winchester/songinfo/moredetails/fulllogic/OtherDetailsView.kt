@@ -101,7 +101,7 @@ internal class OtherInfoWindow : AppCompatActivity() {
 
     private fun updateArtistInfoTextView(artistInfoBio: String){
         runOnUiThread {
-            artistInfoTextView!!.text = Html.fromHtml(artistInfoBio)
+            artistInfoTextView.text = Html.fromHtml(artistInfoBio)
         }
     }
 
@@ -182,7 +182,7 @@ internal class OtherInfoWindow : AppCompatActivity() {
         val textWithBold = text
             .replace("'", " ")
             .replace("\n", "<br>")
-            .replace("(?i)" + term!!.toRegex(), "<b>" + term.uppercase() + "</b>")
+            .replace("(?i)" + (term?.toRegex() ?: ""), "<b>" + (term?.uppercase() ?: "") + "</b>")
         builder.append(textWithBold)
         builder.append("</font></div></html>")
         return builder.toString()
